@@ -20,29 +20,34 @@ app.get("/", (req, res) => {
 
 // Handle POST requests for generating cover letters
 app.post("/generate", async (req, res) => {
-  const { messages, model } = req.body;
+    const { messages, model } = req.body;
+    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;  // Get API key from environment
 
-  try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature: 0.7,
-        max_tokens: 500,
-      }),
-    });
+    if (!OPENROUTER_API_KEY) {
+        return res.status(500).json({ error: "No API key found" });
+    }
 
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
+    try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${OPENROUTER_API_KEY}`,  // Send the API key in the Authorization header
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                model: model || "mistral-small-3.1-24b-instruct:free",  // Use model passed in request or default
+                messages,
+                temperature: 0.7,
+                max_tokens: 500,
+            }),
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error("Error in /generate:", err);
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 // Listen on the port
