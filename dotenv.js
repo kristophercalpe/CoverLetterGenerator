@@ -21,13 +21,22 @@
 
   function load() {
     const envPath = path.resolve(process.cwd(), '.env');
+    
+    // Check if the .env file exists and log it
+    if (!fs.existsSync(envPath)) {
+      console.error('.env file not found at the root of the project.');
+      process.exit(1);
+    }
+    
     const envContent = fs.readFileSync(envPath, 'utf8');
     return parse(envContent);
   }
 
   const env = load();
+  console.log('Loaded .env variables:', env);  // Logs the parsed environment variables
+
+  // Assign the environment variables to process.env
   for (const key in env) {
     process.env[key] = env[key];
   }
-  console.log(env);
 })();
