@@ -1,12 +1,14 @@
+require('dotenv').config(); // Make sure environment variables are loaded
+
 const API_KEYS = [
-    process.env.OPENROUTER_API_KEY_1,  // First account API Key
-    process.env.OPENROUTER_API_KEY_2,  // Second account API Key
-    process.env.OPENROUTER_API_KEY_3   // Third account API Key
+    process.env.OPENROUTER_API_KEY_1,
+    process.env.OPENROUTER_API_KEY_2,
+    process.env.OPENROUTER_API_KEY_3
 ];
 
-let currentAPIKeyIndex = 0;  // Start with the first API key
+let currentAPIKeyIndex = 0; // Start with the first API key
 
-// Function to switch to the next API key
+// Function to switch to the next API key in a round-robin manner
 function switchAPIKey() {
     currentAPIKeyIndex = (currentAPIKeyIndex + 1) % API_KEYS.length; // Switch keys in a round-robin manner
     console.log(`Switching to API Key ${currentAPIKeyIndex + 1}`);
@@ -40,7 +42,7 @@ async function generateLetter() {
     ];
 
     let attemptCount = 0;
-    const maxRetries = API_KEYS.length;  // Retry until all keys are used up
+    const maxRetries = API_KEYS.length; // Retry until all keys are used up
 
     while (attemptCount < maxRetries) {
         const currentAPIKey = API_KEYS[currentAPIKeyIndex];
@@ -49,7 +51,7 @@ async function generateLetter() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${currentAPIKey}`  // Use the current API key
+                    "Authorization": `Bearer ${currentAPIKey}`  // Ensure correct Authorization header
                 },
                 body: JSON.stringify({
                     model: "mistralai/mistral-small-3.1-24b-instruct:free", // Use the same model
