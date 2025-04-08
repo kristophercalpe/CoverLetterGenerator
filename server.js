@@ -83,6 +83,11 @@ async function generateLetter() {
                 }),
             });
 
+            // Check the response status code for debugging
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
             const data = await response.json();
             console.log(data); // Log the response for debugging
 
@@ -94,6 +99,8 @@ async function generateLetter() {
                 return;
             }
         } catch (err) {
+            console.error(err); // Log the error to the console for debugging
+
             if (err.message.includes("Rate limit exceeded")) {
                 attemptCount++;
                 switchAPIKey();  // Switch to the next API key
@@ -108,3 +115,4 @@ async function generateLetter() {
         }
     }
 }
+
