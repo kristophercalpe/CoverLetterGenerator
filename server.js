@@ -7,6 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; 
+console.log(process.env.OPENROUTER_API_KEY); 
 
 // Middleware
 app.use(cors());
