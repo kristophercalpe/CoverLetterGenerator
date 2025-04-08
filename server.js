@@ -31,18 +31,8 @@ app.post('/generate', async (req, res) => {
             },
             body: JSON.stringify({
                 model: "meta-llama/llama-4-maverick:free",
-                messages: [
-                    { role: "system", content: "You are an expert career assistant helping users write professional cover letters." },
-                    { role: "user", content: messages.join('\n') } // Combine the message content
-                ]
+                messages: messages // Send the messages array directly
             }),
-        });
-        console.log({
-            model: "meta-llama/llama-4-maverick:free",
-            messages: [
-                { role: "system", content: "You are an expert career assistant helping users write professional cover letters." },
-                { role: "user", content: messages.join('\n') } // Combine content if needed
-            ]
         });
 
         if (!response.ok) {
@@ -51,7 +41,7 @@ app.post('/generate', async (req, res) => {
 
         const data = await response.json();
         if (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-            return res.json(data.choices[0].message);
+            return res.json({ content: data.choices[0].message.content });
         } else {
             return res.status(500).json({ error: "Failed to generate letter" });
         }
