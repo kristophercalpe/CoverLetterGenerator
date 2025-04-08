@@ -17,7 +17,7 @@ let currentAPIKeyIndex = 0;
 
 function switchAPIKey() {
     currentAPIKeyIndex = (currentAPIKeyIndex + 1) % API_KEYS.length;
-    console.log(`Switching to API Key ${currentAPIKeyIndex + 1}`);  // Log the updated API key index
+    console.log(`Switching to API Key: ${API_KEYS[currentAPIKeyIndex]} (Index: ${currentAPIKeyIndex + 1})`);
 }
 
 app.post('/generate', async (req, res) => {
@@ -31,7 +31,7 @@ app.post('/generate', async (req, res) => {
 
     while (attemptCount < maxRetries) {
         const currentAPIKey = API_KEYS[currentAPIKeyIndex];
-        console.log(`Using API Key: ${currentAPIKey} (Index: ${currentAPIKeyIndex})`);
+        console.log(`Using API Key: ${currentAPIKey} (Index: ${currentAPIKeyIndex + 1})`);
 
         try {
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -61,7 +61,7 @@ app.post('/generate', async (req, res) => {
             
             if (err.message.includes("Rate limit exceeded") || err.message.includes("Unauthorized")) {
                 attemptCount++;
-                switchAPIKey();  // Switch to the next key in case of error
+                switchAPIKey();  // Switch to the next key
                 console.log(`Switching to next API key. Attempt ${attemptCount}`);
                 if (attemptCount === maxRetries) {
                     return res.status(429).json({ error: "Rate limit exceeded. Please try again later." });
