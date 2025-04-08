@@ -1,11 +1,23 @@
 require('dotenv').config(); // Load environment variables from .env file
 
 const express = require('express');
+const cors = require('cors');
 const app = express();
 
-// Your server setup here
-const PORT = process.env.PORT || 3000;  // Fallback to 3000 if PORT is not defined
+// Enable CORS for all origins
+app.use(cors());
 
+// Parse JSON bodies (you'll probably need this for your POST requests)
+app.use(express.json());
+
+// Your other routes
+app.post('/generate', (req, res) => {
+    // Your generation logic here
+    res.json({ message: 'Generated successfully!' });
+});
+
+// Default port or from environment variable
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
