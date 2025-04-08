@@ -1,14 +1,13 @@
-import dotenv from 'dotenv';
+import './dotenv.js'; // Ensure this is at the top of your server.js
+
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
 
-dotenv.config();  // Load environment variables from .env
-
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;  // Ensure API key is loaded
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; // Now available from dotenv.js
 
 // Middleware
 app.use(cors());
@@ -27,7 +26,7 @@ app.post("/generate", async (req, res) => {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,  // Authorization header with Bearer token
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -39,13 +38,7 @@ app.post("/generate", async (req, res) => {
     });
 
     const data = await response.json();
-    console.log(data);  // Log the response to check for errors or information
-
-    if (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-      res.json(data);
-    } else {
-      res.status(500).json({ error: "⚠️ Something went wrong. Try again or check the model name." });
-    }
+    res.json(data);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
