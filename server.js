@@ -1,56 +1,54 @@
-import './dotenv.js'; // Ensure this is at the top of your server.js
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; // Loaded from .env
 
-import express from 'express';
-import cors from 'cors';
-import fetch from 'node-fetch';
+async function generateLetter() {
+    const jobTitle = document.getElementById("jobTitle").value;
+    const jobDesc = document.getElementById("jobDesc").value;
+    const yourInfo = document.getElementById("yourInfo").value;
+    const tone = document.getElementById("tone").value;
+    const outputDiv = document.getElementById("result");
 
-const app = express();
-const PORT = process.env.PORT || 10000;
-
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; // Now available from dotenv.js
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Default route to check if the server is alive
-app.get("/", (req, res) => {
-  res.send("🚀 Server is live! Use the /generate route for cover letter generation.");
-});
-
-// Handle POST requests for generating cover letters
-app.post("/generate", async (req, res) => {
-    const { messages, model } = req.body;
-    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;  // Get API key from environment
-
-    if (!OPENROUTER_API_KEY) {
-        return res.status(500).json({ error: "No API key found" });
+    if (!jobTitle || !jobDesc || !yourInfo) {
+        outputDiv.innerText = "⚠️ Please fill out all fields.";
+        return;
     }
+
+    outputDiv.innerText = "Generating... please wait ⏳";
+
+    const messages = [
+        {
+            role: "system",
+            content: "You are an expert career assistant helping users write professional cover letters."
+        },
+        {
+            role: "user",
+            content: `Write a ${tone} tone professional cover letter for a ${jobTitle} position.\n
+                Job Description: ${jobDesc}\n
+                Candidate Background: ${yourInfo}`
+        }
+    ];
 
     try {
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
-                Authorization: `Bearer ${OPENROUTER_API_KEY}`,  // Send the API key in the Authorization header
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`  // Ensure correct Authorization header
             },
             body: JSON.stringify({
-                model: model || "mistral-small-3.1-24b-instruct:free",  // Use model passed in request or default
-                messages,
-                temperature: 0.7,
-                max_tokens: 500,
+                model: "mistralai/mistral-small-3.1-24b-instruct:free", // Use the same model
+                messages: messages
             }),
         });
 
         const data = await response.json();
-        res.json(data);
-    } catch (err) {
-        console.error("Error in /generate:", err);
-        res.status(500).json({ error: "Internal server error" });
-    }
-});
+        console.log(data); // Log the response for debugging
 
-// Listen on the port
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+        if (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+            outputDiv.innerText = data.choices[0].message.content.trim();
+        } else {
+            outputDiv.innerText = "⚠️ Something went wrong. Try again or check the model name.";
+        }
+    } catch (err) {
+        outputDiv.innerText = "❌ Error: " + err.message;
+    }
+}
