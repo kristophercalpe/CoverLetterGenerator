@@ -7,6 +7,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve a basic "Server is running" message when visiting the root
+app.get('/', (req, res) => {
+    res.send('Server is running');
+});
+
 const API_KEYS = [
     process.env.OPENROUTER_API_KEY_1,
     process.env.OPENROUTER_API_KEY_2,
