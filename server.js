@@ -1,11 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+
+dotenv.config(); // Load environment variables from .env file
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; // Use env variable for API key
 
 // Middleware
 app.use(cors());
