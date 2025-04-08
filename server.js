@@ -1,24 +1,31 @@
-const express = require('express');
-const cors = require('cors');
-const fetch = require('node-fetch');
+import express from 'express';
+import cors from 'cors';
+import fetch from 'node-fetch';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-const OPENROUTER_API_KEY = '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';
+const OPENROUTER_API_KEY = "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";
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-app.post('/generate', async (req, res) => {
+// Default route to check if the server is alive
+app.get("/", (req, res) => {
+  res.send("🚀 Server is live! Use the /generate route for cover letter generation.");
+});
+
+// Handle POST requests for generating cover letters
+app.post("/generate", async (req, res) => {
   const { messages, model } = req.body;
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model,
@@ -36,6 +43,7 @@ app.post('/generate', async (req, res) => {
   }
 });
 
+// Listen on the port
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
