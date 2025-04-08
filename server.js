@@ -7,11 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve a basic "Server is running" message when visiting the root
-app.get('/', (req, res) => {
-    res.send('Server is running');
-});
-
 const API_KEYS = [
     process.env.OPENROUTER_API_KEY_1,
     process.env.OPENROUTER_API_KEY_2,
@@ -22,7 +17,7 @@ let currentAPIKeyIndex = 0;
 
 function switchAPIKey() {
     currentAPIKeyIndex = (currentAPIKeyIndex + 1) % API_KEYS.length;
-    console.log(`Switching to API Key ${currentAPIKeyIndex + 1}`);
+    console.log(`Switching to API Key ${currentAPIKeyIndex + 1}`);  // Log the updated API key index
 }
 
 app.post('/generate', async (req, res) => {
@@ -36,7 +31,7 @@ app.post('/generate', async (req, res) => {
 
     while (attemptCount < maxRetries) {
         const currentAPIKey = API_KEYS[currentAPIKeyIndex];
-        console.log(`Using API Key: ${currentAPIKey}`);  // Log the API key being used
+        console.log(`Using API Key: ${currentAPIKey} (Index: ${currentAPIKeyIndex})`);  // Log both the key and index
 
         try {
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -64,7 +59,7 @@ app.post('/generate', async (req, res) => {
         } catch (err) {
             if (err.message.includes("Rate limit exceeded")) {
                 attemptCount++;
-                switchAPIKey();
+                switchAPIKey();  // Switch API key if rate limit is exceeded
                 if (attemptCount === maxRetries) {
                     return res.status(429).json({ error: "Rate limit exceeded. Please try again later." });
                 }
@@ -76,8 +71,7 @@ app.post('/generate', async (req, res) => {
     }
 });
 
-
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
