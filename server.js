@@ -31,7 +31,7 @@ app.post('/generate', async (req, res) => {
 
     while (attemptCount < maxRetries) {
         const currentAPIKey = API_KEYS[currentAPIKeyIndex];
-        console.log(`Using API Key: ${currentAPIKey} (Index: ${currentAPIKeyIndex})`);  // Log both the key and index
+        console.log(`Using API Key: ${currentAPIKey} (Index: ${currentAPIKeyIndex})`);
 
         try {
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -57,14 +57,16 @@ app.post('/generate', async (req, res) => {
                 return res.status(500).json({ error: "Failed to generate letter" });
             }
         } catch (err) {
-            if (err.message.includes("Rate limit exceeded")) {
+            console.error(`Attempt ${attemptCount + 1}: Error using API Key ${currentAPIKeyIndex + 1}: ${err.message}`);
+            
+            if (err.message.includes("Rate limit exceeded") || err.message.includes("Unauthorized")) {
                 attemptCount++;
-                switchAPIKey();  // Switch API key if rate limit is exceeded
+                switchAPIKey();  // Switch to the next key in case of error
+                console.log(`Switching to next API key. Attempt ${attemptCount}`);
                 if (attemptCount === maxRetries) {
                     return res.status(429).json({ error: "Rate limit exceeded. Please try again later." });
                 }
             } else {
-                console.error(err.message);  // Log error for debugging
                 return res.status(500).json({ error: err.message });
             }
         }
