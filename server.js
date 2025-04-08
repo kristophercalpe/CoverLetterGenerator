@@ -36,7 +36,7 @@ app.post('/generate', async (req, res) => {
 
     while (attemptCount < maxRetries) {
         const currentAPIKey = API_KEYS[currentAPIKeyIndex];
-        console.log(`Using API Key: ${currentAPIKey}`);
+        console.log(`Using API Key: ${currentAPIKey}`);  // Log the API key being used
 
         try {
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -69,11 +69,13 @@ app.post('/generate', async (req, res) => {
                     return res.status(429).json({ error: "Rate limit exceeded. Please try again later." });
                 }
             } else {
+                console.error(err.message);  // Log error for debugging
                 return res.status(500).json({ error: err.message });
             }
         }
     }
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
