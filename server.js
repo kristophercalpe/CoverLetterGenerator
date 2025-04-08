@@ -1,4 +1,16 @@
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY; // Loaded from .env
+const API_KEYS = [
+    process.env.OPENROUTER_API_KEY_1,  // First account API Key
+    process.env.OPENROUTER_API_KEY_2,  // Second account API Key
+    process.env.OPENROUTER_API_KEY_3   // Third account API Key
+];
+
+let currentAPIKeyIndex = 0;  // Start with the first API key
+
+// Function to switch to the next API key
+function switchAPIKey() {
+    currentAPIKeyIndex = (currentAPIKeyIndex + 1) % API_KEYS.length; // Switch keys in a round-robin manner
+    console.log(`Switching to API Key ${currentAPIKeyIndex + 1}`);
+}
 
 async function generateLetter() {
     const jobTitle = document.getElementById("jobTitle").value;
@@ -27,28 +39,47 @@ async function generateLetter() {
         }
     ];
 
-    try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${OPENROUTER_API_KEY}`  // Ensure correct Authorization header
-            },
-            body: JSON.stringify({
-                model: "mistralai/mistral-small-3.1-24b-instruct:free", // Use the same model
-                messages: messages
-            }),
-        });
+    let attemptCount = 0;
+    const maxRetries = API_KEYS.length;  // Retry until all keys are used up
 
-        const data = await response.json();
-        console.log(data); // Log the response for debugging
+    while (attemptCount < maxRetries) {
+        const currentAPIKey = API_KEYS[currentAPIKeyIndex];
+        try {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${currentAPIKey}`  // Use the current API key
+                },
+                body: JSON.stringify({
+                    model: "mistralai/mistral-small-3.1-24b-instruct:free", // Use the same model
+                    messages: messages
+                }),
+            });
 
-        if (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-            outputDiv.innerText = data.choices[0].message.content.trim();
-        } else {
-            outputDiv.innerText = "⚠️ Something went wrong. Try again or check the model name.";
+            const data = await response.json();
+            console.log(data); // Log the response for debugging
+
+            if (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+                outputDiv.innerText = data.choices[0].message.content.trim();
+                return;  // Successfully generated the letter, exit the function
+            } else {
+                outputDiv.innerText = "⚠️ Something went wrong. Try again or check the model name.";
+                return;
+            }
+        } catch (err) {
+            // If an error occurs (like rate limit exceeded), switch to the next API key
+            if (err.message.includes("Rate limit exceeded")) {
+                attemptCount++;
+                switchAPIKey();  // Switch to the next API key
+                outputDiv.innerText = `❌ Rate limit exceeded. Trying with another key... (${attemptCount} out of ${maxRetries} tries).`;
+                if (attemptCount === maxRetries) {
+                    outputDiv.innerText = "❌ All API keys are exhausted. Please try again later.";
+                }
+            } else {
+                outputDiv.innerText = "❌ Error: " + err.message;
+                return;
+            }
         }
-    } catch (err) {
-        outputDiv.innerText = "❌ Error: " + err.message;
     }
 }
