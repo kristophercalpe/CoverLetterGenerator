@@ -30,9 +30,19 @@ app.post('/generate', async (req, res) => {
                 "Authorization": `Bearer ${currentAPIKey}`,
             },
             body: JSON.stringify({
-                model: "mistral-small-3.1-24b-instruct:free",
-                messages: [{ role: "system", content: "You are an expert career assistant helping users write professional cover letters." }, { role: "user", content: messages }]
+                model: "meta-llama/llama-4-maverick:free",
+                messages: [
+                    { role: "system", content: "You are an expert career assistant helping users write professional cover letters." },
+                    { role: "user", content: messages.join('\n') } // Combine the message content
+                ]
             }),
+        });
+        console.log({
+            model: "meta-llama/llama-4-maverick:free",
+            messages: [
+                { role: "system", content: "You are an expert career assistant helping users write professional cover letters." },
+                { role: "user", content: messages.join('\n') } // Combine content if needed
+            ]
         });
 
         if (!response.ok) {
