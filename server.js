@@ -11,7 +11,8 @@ const API_KEYS = [
     process.env.OPENROUTER_API_KEY_1,
     process.env.OPENROUTER_API_KEY_2,
     process.env.OPENROUTER_API_KEY_3,
-    process.env.OPENROUTER_API_KEY_4
+    process.env.OPENROUTER_API_KEY_4,
+    process.env.OPENROUTER_API_KEY_5
 ];
 
 app.post('/generate', async (req, res) => {
