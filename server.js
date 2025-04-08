@@ -1,4 +1,4 @@
-require('dotenv').config(); // Make sure environment variables are loaded
+require('dotenv').config(); // Load environment variables from .env file
 
 const API_KEYS = [
     process.env.OPENROUTER_API_KEY_1,
@@ -10,7 +10,7 @@ let currentAPIKeyIndex = 0; // Start with the first API key
 
 // Function to switch to the next API key in a round-robin manner
 function switchAPIKey() {
-    currentAPIKeyIndex = (currentAPIKeyIndex + 1) % API_KEYS.length; // Switch keys in a round-robin manner
+    currentAPIKeyIndex = (currentAPIKeyIndex + 1) % API_KEYS.length;
     console.log(`Switching to API Key ${currentAPIKeyIndex + 1}`);
 }
 
@@ -46,6 +46,8 @@ async function generateLetter() {
 
     while (attemptCount < maxRetries) {
         const currentAPIKey = API_KEYS[currentAPIKeyIndex];
+        console.log(`Using API Key: ${currentAPIKey}`); // Log the API key being used
+        
         try {
             const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                 method: "POST",
@@ -54,7 +56,7 @@ async function generateLetter() {
                     "Authorization": `Bearer ${currentAPIKey}`  // Ensure correct Authorization header
                 },
                 body: JSON.stringify({
-                    model: "mistralai/mistral-small-3.1-24b-instruct:free", // Use the same model
+                    model: "mistralai/mistral-small-3.1-24b-instruct:free",
                     messages: messages
                 }),
             });
@@ -70,7 +72,6 @@ async function generateLetter() {
                 return;
             }
         } catch (err) {
-            // If an error occurs (like rate limit exceeded), switch to the next API key
             if (err.message.includes("Rate limit exceeded")) {
                 attemptCount++;
                 switchAPIKey();  // Switch to the next API key
